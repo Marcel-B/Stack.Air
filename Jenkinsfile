@@ -100,10 +100,10 @@ node {
             stage('Docker'){
                 mvnHome = env.BUILD_NUMBER
                 updateGitlabCommitStatus name: 'containerize', state: 'running', sha: commitId
-		        sh "docker build -t docker.qaybe.de/stack.datalayer:0.0.${mvnHome} ."
+		        sh "docker build -t docker.qaybe.de/stack.air:0.0.${mvnHome} ."
                 
                 withDockerRegistry(credentialsId: 'DockerRegistry', toolName: 'QaybeDocker', url: 'https://docker.qaybe.de') {
-	                sh "docker push docker.qaybe.de/stack.datalayer:0.0.${mvnHome}"   
+	                sh "docker push docker.qaybe.de/stack.air:0.0.${mvnHome}"   
                 }
 
                 updateGitlabCommitStatus name: 'containerize', state: 'success', sha: commitId
