@@ -27,7 +27,7 @@ namespace com.b_velop.stack.Air
         {
             services.AddSingleton<IUploadService, UploadService>();
             services.AddHttpClient<IIdentityProviderService, IdentityProviderService>();
-            services.Configure<ApiSecret>(Configuration);
+            services.Configure<ApiSecret>(Configuration.GetSection("ApiSecret"));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
