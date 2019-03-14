@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
 
-namespace Air
+namespace com.b_velop.stack.Air
 {
     public class Program
     {

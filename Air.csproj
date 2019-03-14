@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <RootNamespace>com.b_velop.stack.Air</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +14,9 @@
     <PackageReference Include="NLog.StructuredLogging.Json" Version="3.0.0" />
     <PackageReference Include="NLog" Version="4.5.11" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="4.8.0" />
+    <PackageReference Include="GraphQL.Client" Version="1.0.3" />
+    <PackageReference Include="App.IdentityProvider" Version="2.1.10" />
+    <PackageReference Include="Classes" Version="0.0.4" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,5 +30,10 @@
     <Content Update="NuGet.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+    <Folder Include="BL\" />
+    <Folder Include="Services\" />
   </ItemGroup>
 </Project>

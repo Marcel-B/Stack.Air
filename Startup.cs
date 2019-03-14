@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using com.b_velop.stack.Air.Services;
+using com.b_velop.App.IdentityProvider;
 
-namespace Air
+namespace com.b_velop.stack.Air
 {
     public class Startup
     {
@@ -13,7 +15,8 @@ namespace Air
         public void ConfigureServices(
             IServiceCollection services)
         {
-
+            services.AddSingleton<IUploadService, UploadService>();
+            services.AddHttpClient<IIdentityProviderService, IdentityProviderService>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
