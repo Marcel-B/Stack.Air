@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using com.b_velop.stack.Air.Services;
 using com.b_velop.stack.Classes.Dtos;
@@ -24,7 +22,6 @@ namespace com.b_velop.stack.Air.Controllers
         {
             _logger = logger;
             _service = service;
-            
         }
 
         // GET: api/values
