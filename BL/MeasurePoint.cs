@@ -9,5 +9,9 @@ namespace com.b_velop.stack.Air.BL
         public static Guid DHT22_Humidity = new Guid("795f28b0-77ed-4a57-af57-32a2c47cdba0");
         public static Guid SDS011_PM2_5 = new Guid("fb43a587-8251-4ea1-97b2-6f2f702952a6");
         public static Guid SDS011_PM10 = new Guid("777cecc4-c140-477d-bd94-5a0a611f47fc");
+        public static Guid WiFi_MAXMICRO = new Guid("a862865d-ca15-4efd-b208-9a5d3b6c1c9b");
+        public static Guid WiFi_MINMICRO = new Guid("c70334d8-6c77-46eb-9384-e7a51baef17b");
+        public static Guid WiFi_SIGNAL = new Guid("84e2803e-5c95-4126-999e-d508cd41a47b");
+        public static Guid SAMPLES = new Guid("ccc55f5c-c2df-4d39-b5d0-c7ee050a1113");  
     }
 }

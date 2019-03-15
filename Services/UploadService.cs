@@ -14,6 +14,7 @@ using GraphQL.Client;
 using GraphQL.Common.Request;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens.Saml2;
 
 namespace com.b_velop.stack.Air.Services
 {
@@ -90,7 +91,6 @@ namespace com.b_velop.stack.Air.Services
                     switch (item.ValueType)
                     {
                         case "SDS_P1":
-                            var n = Guid.NewGuid();
                             if (double.TryParse(item.Value, NumberStyles.Any, CultureInfo.CreateSpecificCulture("en-GB"), out var sdsP10))
                                 await SendAsync(timestamp, BL.MeasurePoint.SDS011_PM10, sdsP10);
                             break;
@@ -115,24 +115,22 @@ namespace com.b_velop.stack.Air.Services
                             if (double.TryParse(item.Value, NumberStyles.Any, CultureInfo.CreateSpecificCulture("en-GB"), out var tempreatureBmp))
                                 await SendAsync(timestamp, BL.MeasurePoint.BMP180_Temperature, tempreatureBmp);
                             break;
-                        //case "max_micro":
-                        //    if (double.TryParse(item.Value, NumberStyles.Any, CultureInfo.CreateSpecificCulture("en-GB"), out var microMax))
-                        //        airQualitySensor.MaxMicro = microMax;
-                        //    break;
-                        //case "min_micro":
-                        //    if (double.TryParse(item.Value, NumberStyles.Any, CultureInfo.CreateSpecificCulture("en-GB"), out var microMin))
-                        //        airQualitySensor.MinMicro = microMin;
-                        //    break;
-                        //case "samples":
-                        //    if (double.TryParse(item.Value, NumberStyles.Any, CultureInfo.CreateSpecificCulture("en-GB"), out var samples))
-                        //        airQualitySensor.Samples = samples;
-                        //    break;
-                        //case "signal":
-                        //if (double.TryParse(item.Value, NumberStyles.Any, CultureInfo.CreateSpecificCulture("en-GB"), out var signal))
-                        //    airQualitySensor.Signal = signal;
-                        //break;
-                        default:
+                        case "max_micro":
+                            if (double.TryParse(item.Value, NumberStyles.Any, CultureInfo.CreateSpecificCulture("en-GB"), out var microMax))
+                                await SendAsync(timestamp, BL.MeasurePoint.WiFi_MAXMICRO, microMax);
                             break;
+                        case "min_micro":
+                            if (double.TryParse(item.Value, NumberStyles.Any, CultureInfo.CreateSpecificCulture("en-GB"), out var microMin))
+                                await SendAsync(timestamp, BL.MeasurePoint.WiFi_MINMICRO, microMin);
+                            break;
+                        case "samples":
+                            if (double.TryParse(item.Value, NumberStyles.Any, CultureInfo.CreateSpecificCulture("en-GB"), out var samples))
+                                await SendAsync(timestamp, BL.MeasurePoint.SAMPLES, samples);
+                            break;
+                        case "signal":
+                            if (double.TryParse(item.Value, NumberStyles.Any, CultureInfo.CreateSpecificCulture("en-GB"), out var signal))
+                                await SendAsync(timestamp, BL.MeasurePoint.WiFi_SIGNAL, signal);
+                        break;
                     }
                 }
             }
