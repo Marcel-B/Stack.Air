@@ -41,7 +41,7 @@ namespace com.b_velop.stack.Air.Controllers
             }
             catch(Exception ex)
             {
-                _logger.LogError(1111, ex, $"Error occurred while uploading '{value}'.", value);
+                _logger.LogError(1442, ex, $"Error occurred while uploading '{value}'.", value);
                 return new StatusCodeResult(500);
             }
         }

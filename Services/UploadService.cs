@@ -22,6 +22,8 @@ namespace com.b_velop.stack.Air.Services
     public class UploadService : IUploadService
     {
         static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
+        private GraphQLClient _graphQLClient;
+        private GraphQLRequest _graphQLRequest;
         private readonly IIdentityProviderService _service;
         private readonly ApiSecret _apiSecret;
         private readonly ILogger<UploadService> _logger;
@@ -29,10 +31,16 @@ namespace com.b_velop.stack.Air.Services
         private DateTime exp;
 
         public UploadService(
+            GraphQLRequest graphQLRequest,
+            GraphQLClient graphQLClient,
             IOptions<ApiSecret> apiSecret,
             IIdentityProviderService service,
             ILogger<UploadService> logger)
         {
+            _graphQLClient = graphQLClient;
+            _graphQLRequest = graphQLRequest;
+            _graphQLRequest.Query = @"mutation AddValue($measure: MeasureValueInput!) { createMeasureValue(measureValueType: $measure){id}}";
+            _graphQLRequest.OperationName = "AddValue";
             _service = service;
             _apiSecret = apiSecret.Value;
             _logger = logger;
@@ -68,15 +76,9 @@ namespace com.b_velop.stack.Air.Services
             Guid id,
             double value)
         {
-            var request = new GraphQLRequest();
-
-            request.Query = @"mutation AddValue($measure: MeasureValueInput!) { createMeasureValue(measureValueType: $measure){id}}";
-            request.Variables = new { measure = new { Timestamp = time, Point = id, Value = value } };
-            request.OperationName = "AddValue";
-
-            var graphQLClient = new GraphQLClient(_apiSecret.GraphQLUrl);
-            graphQLClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.AccessToken);
-            var graphQLResponse = await graphQLClient.PostAsync(request);
+            _graphQLRequest.Variables = new { measure = new { Timestamp = time, Point = id, Value = value } };
+            _graphQLClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.AccessToken);
+            var graphQLResponse = await _graphQLClient.PostAsync(_graphQLRequest);
             return;
         }
 
@@ -130,13 +132,13 @@ namespace com.b_velop.stack.Air.Services
                         case "signal":
                             if (double.TryParse(item.Value, NumberStyles.Any, CultureInfo.CreateSpecificCulture("en-GB"), out var signal))
                                 await SendAsync(timestamp, BL.MeasurePoint.WiFi_SIGNAL, signal);
-                        break;
+                            break;
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _logger.LogError(1142, e, $"Error while inserting Luftdaten", airdata);
+                _logger.LogError(1422, ex, $"Error while inserting Luftdaten", airdata);
                 return;
             }
         }

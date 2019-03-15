@@ -7,6 +7,8 @@ using com.b_velop.stack.Air.Services;
 using com.b_velop.App.IdentityProvider;
 using com.b_velop.stack.Air.BL;
 using Microsoft.Extensions.Configuration;
+using GraphQL.Client;
+using GraphQL.Common.Request;
 
 namespace com.b_velop.stack.Air
 {
@@ -28,6 +30,9 @@ namespace com.b_velop.stack.Air
             services.AddSingleton<IUploadService, UploadService>();
             services.AddHttpClient<IIdentityProviderService, IdentityProviderService>();
             services.Configure<ApiSecret>(Configuration.GetSection("ApiSecret"));
+            var url = Configuration.GetSection("ApiSecret").GetSection("GraphQLUrl").Value;
+            services.AddSingleton(new GraphQLClient(url));
+            services.AddSingleton<GraphQLRequest>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
