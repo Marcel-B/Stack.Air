@@ -3,6 +3,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
+using Prometheus;
 
 namespace com.b_velop.stack.Air
 {
@@ -10,7 +11,13 @@ namespace com.b_velop.stack.Air
     {
         public static void Main(string[] args)
         {
+
+            var metricServer = new MetricPusher(
+                endpoint: "https://push.qaybe.de/metrics", 
+                job: "stack_air");
+            metricServer.Start();           
             // NLog: setup the logger first to catch all errors
+
             var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
             try
             {
