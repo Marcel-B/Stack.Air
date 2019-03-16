@@ -9,6 +9,7 @@ using com.b_velop.stack.Air.BL;
 using Microsoft.Extensions.Configuration;
 using GraphQL.Client;
 using GraphQL.Common.Request;
+using com.b_velop.stack.Air.Middlewares;
 
 namespace com.b_velop.stack.Air
 {
@@ -45,7 +46,7 @@ namespace com.b_velop.stack.Air
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseMetircCollector();
             app.UseMvc();
         }
     }
