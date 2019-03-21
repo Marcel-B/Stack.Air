@@ -11,17 +11,14 @@ namespace com.b_velop.stack.Air
     {
         public static void Main(string[] args)
         {
-
-            var metricServer = new MetricPusher(
-                endpoint: "https://push.qaybe.de/metrics", 
-                job: "stack_air");
-            metricServer.Start();     
-                  
-            // NLog: setup the logger first to catch all errors
-
             var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
             try
             {
+                var metricServer = new MetricPusher(
+                    endpoint: "https://push.qaybe.de/metrics",
+                    job: "stack_air");
+                metricServer.Start();
+
                 logger.Debug("init main");
                 CreateWebHostBuilder(args)
                     .Build()

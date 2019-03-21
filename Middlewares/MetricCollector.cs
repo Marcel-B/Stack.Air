@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Prometheus;
@@ -46,8 +43,6 @@ namespace com.b_velop.stack.Air.Middlewares
     public static class MetricCollectorExtensions
     {
         public static IApplicationBuilder UseMetircCollector(this IApplicationBuilder builder)
-        {
-            return builder.UseMiddleware<MetricCollector>();
-        }
+            => builder.UseMiddleware<MetricCollector>();
     }
 }
