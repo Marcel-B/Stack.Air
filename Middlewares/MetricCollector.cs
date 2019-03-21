@@ -10,7 +10,7 @@ namespace com.b_velop.stack.Air.Middlewares
     {
         private readonly RequestDelegate _next;
         public static Gauge RequestDuration = Metrics.CreateGauge(
-            "b_velop_stack_air_request_duration",
+            "b_velop_stack_air_requests_duration",
             "Request duration of all requests.",
             new GaugeConfiguration
             {
@@ -18,7 +18,7 @@ namespace com.b_velop.stack.Air.Middlewares
             });
 
         public static Counter RequestCoutner = Metrics.CreateCounter(
-            "b_velop_stack_air_request_total",
+            "b_velop_stack_air_requests_total",
             "Request counter of all requests",
             new CounterConfiguration
             {
