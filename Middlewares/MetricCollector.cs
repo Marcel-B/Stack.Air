@@ -35,7 +35,9 @@ namespace com.b_velop.stack.Air.Middlewares
         {
             RequestCoutner.WithLabels(httpContext.Request.Path, httpContext.Request.Method).Inc();
             using (RequestDuration.WithLabels(httpContext.Request.Path, httpContext.Request.Method).NewTimer())
+            {
                 return _next(httpContext);
+            }
         }
     }
 

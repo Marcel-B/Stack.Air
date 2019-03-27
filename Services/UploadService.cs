@@ -55,7 +55,7 @@ namespace com.b_velop.stack.Air.Services
                     _exp = DateTime.Now.AddSeconds(_token.ExpiresIn);
                     if (_token == null)
                     {
-                        _logger.LogError(1432, "Error occurred while fetch token.");
+                        _logger.LogError(2432, "Error occurred while fetch token.");
                         return;
                     }
                 }
@@ -73,7 +73,7 @@ namespace com.b_velop.stack.Air.Services
         {
             _graphQlRequest.Variables = new { measure = new { Timestamp = time, Point = id, Value = value } };
             _graphQlClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token.AccessToken);
-            var graphQLResponse = await _graphQlClient.PostAsync(_graphQlRequest);
+            var graphQlResponse = await _graphQlClient.PostAsync(_graphQlRequest);
             return;
         }
 
@@ -133,7 +133,7 @@ namespace com.b_velop.stack.Air.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(1422, ex, $"Error while inserting Luftdaten", airdata);
+                _logger.LogError(2422, ex, $"Error while inserting Luftdaten", airdata);
                 return;
             }
         }

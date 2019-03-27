@@ -9,11 +9,12 @@ using Microsoft.Extensions.Logging;
 
 namespace com.b_velop.stack.Air.Controllers
 {
+    [ApiController]
     [Route("api/[controller]")]
     public class AirController : Controller
     {
-        private ILogger<AirController> _logger;
-        private IUploadService _service;
+        private readonly ILogger<AirController> _logger;
+        private readonly IUploadService _service;
 
         public AirController(
             IUploadService service,
@@ -24,12 +25,12 @@ namespace com.b_velop.stack.Air.Controllers
             _service = service;
         }
 
-        // GET: api/values
+        // GET: api/air
         [HttpGet]
         public IActionResult Get()
             => Ok();
 
-        // POST api/values
+        // POST api/air
         [HttpPost]
         public async Task<IActionResult> Post(
             [FromBody]AirdataDto value)
@@ -39,9 +40,9 @@ namespace com.b_velop.stack.Air.Controllers
                 await _service.UploadAsync(value, DateTimeOffset.Now);
                 return Ok();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                _logger.LogError(1442, ex, $"Error occurred while uploading '{value}'.", value);
+                _logger.LogError(2442, ex, $"Error occurred while uploading value '{value}'.", value);
                 return new StatusCodeResult(500);
             }
         }
