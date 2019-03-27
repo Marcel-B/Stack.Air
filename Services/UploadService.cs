@@ -1,64 +1,59 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Net;
-using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using com.b_velop.App.IdentityProvider;
 using com.b_velop.App.IdentityProvider.Model;
 using com.b_velop.stack.Air.BL;
 using com.b_velop.stack.Classes.Dtos;
-using com.b_velop.stack.Classes.Models;
 using GraphQL.Client;
 using GraphQL.Common.Request;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens.Saml2;
 
 namespace com.b_velop.stack.Air.Services
 {
 
     public class UploadService : IUploadService
     {
-        static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
-        private GraphQLClient _graphQLClient;
-        private GraphQLRequest _graphQLRequest;
+        private static readonly SemaphoreSlim SemaphoreSlim = new SemaphoreSlim(1, 1);
+        private readonly GraphQLClient _graphQlClient;
+        private readonly GraphQLRequest _graphQlRequest;
         private readonly IIdentityProviderService _service;
         private readonly ApiSecret _apiSecret;
         private readonly ILogger<UploadService> _logger;
-        private Token token;
-        private DateTime exp;
+        private Token _token;
+        private DateTime _exp;
 
         public UploadService(
-            GraphQLRequest graphQLRequest,
-            GraphQLClient graphQLClient,
+            GraphQLRequest graphQlRequest,
+            GraphQLClient graphQlClient,
             IOptions<ApiSecret> apiSecret,
             IIdentityProviderService service,
             ILogger<UploadService> logger)
         {
-            _graphQLClient = graphQLClient;
-            _graphQLRequest = graphQLRequest;
-            _graphQLRequest.Query = @"mutation AddValue($measure: MeasureValueInput!) { createMeasureValue(measureValueType: $measure){id}}";
-            _graphQLRequest.OperationName = "AddValue";
+            _graphQlClient = graphQlClient;
+            _graphQlRequest = graphQlRequest;
+            _graphQlRequest.Query = @"mutation AddValue($measure: MeasureValueInput!) { createMeasureValue(measureValueType: $measure){id}}";
+            _graphQlRequest.OperationName = "AddValue";
             _service = service;
             _apiSecret = apiSecret.Value;
             _logger = logger;
-            exp = DateTime.MinValue;
+            _exp = DateTime.MinValue;
         }
 
         public async Task UpdateTokenAsync()
         {
-            await semaphoreSlim.WaitAsync();
+            await SemaphoreSlim.WaitAsync();
             try
             {
-                if (token == null || exp < DateTime.Now)
+                if (_token == null || _exp < DateTime.Now)
                 {
                     var infoItem = new InfoItem(_apiSecret.ClientId, _apiSecret.ClientSecret, _apiSecret.Scope, _apiSecret.AuthorityUrl);
                     var url = _apiSecret.GraphQLUrl;
-                    token = await _service.GetTokenAsync(infoItem);
-                    exp = DateTime.Now.AddSeconds(token.ExpiresIn);
-                    if (token == null)
+                    _token = await _service.GetTokenAsync(infoItem);
+                    _exp = DateTime.Now.AddSeconds(_token.ExpiresIn);
+                    if (_token == null)
                     {
                         _logger.LogError(1432, "Error occurred while fetch token.");
                         return;
@@ -67,7 +62,7 @@ namespace com.b_velop.stack.Air.Services
             }
             finally
             {
-                semaphoreSlim.Release();
+                SemaphoreSlim.Release();
             }
         }
 
@@ -76,9 +71,9 @@ namespace com.b_velop.stack.Air.Services
             Guid id,
             double value)
         {
-            _graphQLRequest.Variables = new { measure = new { Timestamp = time, Point = id, Value = value } };
-            _graphQLClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.AccessToken);
-            var graphQLResponse = await _graphQLClient.PostAsync(_graphQLRequest);
+            _graphQlRequest.Variables = new { measure = new { Timestamp = time, Point = id, Value = value } };
+            _graphQlClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token.AccessToken);
+            var graphQLResponse = await _graphQlClient.PostAsync(_graphQlRequest);
             return;
         }
 
