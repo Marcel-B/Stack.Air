@@ -70,11 +70,12 @@ namespace com.b_velop.stack.Air.Services
                 var success = await TryRequestTokenAsync();
                 if (!success)
                     return false;
-var 
+                return success;
             }
             catch (Exception ex)
             {
                 _logger.LogError(2432, ex, $"Error occurred while uploading Air values '{values}'.", values);
+                return false;
             }
         }
     }
