@@ -81,9 +81,9 @@ namespace com.b_velop.stack.Air.Services
             AirdataDto airdata,
             DateTimeOffset timestamp)
         {
-            try
+            foreach (var item in airdata.Sensordatavalues)
             {
-                foreach (var item in airdata.Sensordatavalues)
+                try
                 {
                     switch (item.ValueType)
                     {
@@ -130,11 +130,11 @@ namespace com.b_velop.stack.Air.Services
                             break;
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(2422, ex, $"Error while inserting Luftdaten", airdata);
-                return;
+                catch (Exception ex)
+                {
+                    _logger.LogError(2422, ex, $"Error while inserting Luftdaten '{item.ValueType}: {item.Value}'", airdata);
+                    return;
+                }
             }
         }
 
