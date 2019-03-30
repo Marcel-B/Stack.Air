@@ -4,7 +4,7 @@ node {
     def commitId
     properties([gitLabConnection('GitLab')])
     
-    stage('Preparation') { 
+    stage('preparation') { 
         checkout scm
         commitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
         updateGitlabCommitStatus name: 'restore', state: 'pending', sha: commitId
@@ -13,16 +13,15 @@ node {
         updateGitlabCommitStatus name: 'test', state: 'pending', sha: commitId
         if(env.BRANCH_NAME == 'master'){
             updateGitlabCommitStatus name: 'containerize', state: 'pending', sha: commitId
-            //updateGitlabCommitStatus name: 'deploy', state: 'pending', sha: commitId
         }
         updateGitlabCommitStatus name: 'clean', state: 'pending', sha: commitId
     }
 
     try{
-        stage('Restore') {
-            updateGitlabCommitStatus name: 'restore', state: 'running', sha: commitId 
-            sh 'dotnet restore'
-            updateGitlabCommitStatus name: 'restore', state: 'success', sha: commitId 
+        stage('restore') {
+            gitlabCommitStatus("restore") {
+                sh 'dotnet restore'
+            }
         }
     }catch(Exception ex){
         updateGitlabCommitStatus name: 'restore', state: 'failed', sha: commitId
@@ -31,18 +30,18 @@ node {
         updateGitlabCommitStatus name: 'test', state: 'canceled', sha: commitId
         if(env.BRANCH_NAME == 'master'){
             updateGitlabCommitStatus name: 'containerize', state: 'canceled', sha: commitId
-            //updateGitlabCommitStatus name: 'deploy', state: 'canceled', sha: commitId
         }
         updateGitlabCommitStatus name: 'clean', state: 'canceled', sha: commitId
         currentBuild.result = 'FAILURE'
         echo "RESULT: ${currentBuild.result}"
         return 
     }
+    
     try{
-        stage('Build'){
-            updateGitlabCommitStatus name: 'build', state: 'running', sha: commitId 
-            sh 'dotnet build'
-            updateGitlabCommitStatus name: 'build', state: 'success', sha: commitId
+        stage('build'){
+            gitlabCommitStatus("build") {
+                sh 'dotnet build'
+            }
         }
     }catch(Exception ex){
         updateGitlabCommitStatus name: 'build', state: 'failed', sha: commitId
@@ -50,7 +49,6 @@ node {
         updateGitlabCommitStatus name: 'test', state: 'canceled', sha: commitId
         if(env.BRANCH_NAME == 'master'){
             updateGitlabCommitStatus name: 'containerize', state: 'canceled', sha: commitId
-          //  updateGitlabCommitStatus name: 'deploy', state: 'canceled', sha: commitId
         }
         updateGitlabCommitStatus name: 'clean', state: 'canceled', sha: commitId
         currentBuild.result = 'FAILURE'
@@ -59,17 +57,16 @@ node {
     }
 
     try{
-        stage('Publish'){
-            updateGitlabCommitStatus name: 'publish', state: 'running', sha: commitId
-            sh 'dotnet publish -c Release'
-            updateGitlabCommitStatus name: 'publish', state: 'success', sha: commitId
+        stage('publish'){
+            gitlabCommitStatus("publish") {
+                sh 'dotnet publish -c Release'
+            }
         }
     }catch(Exception ex){
         updateGitlabCommitStatus name: 'publish', state: 'failed', sha: commitId
         updateGitlabCommitStatus name: 'test', state: 'canceled', sha: commitId
         if(env.BRANCH_NAME == 'master'){
             updateGitlabCommitStatus name: 'containerize', state: 'canceled', sha: commitId
-           // updateGitlabCommitStatus name: 'deploy', state: 'canceled', sha: commitId
         }
         updateGitlabCommitStatus name: 'clean', state: 'canceled', sha: commitId
         currentBuild.result = 'FAILURE'
@@ -78,16 +75,15 @@ node {
     }
 
     try{
-        stage('Tests') {
+        stage('test') {
             gitlabCommitStatus("test") {
-                //sh 'dotnet test /p:CollectCoverage=true /p:Include="[Website.Nuqneh.de]*"'
+                sh 'dotnet test' // /p:CollectCoverage=true /p:Include="[Website.Nuqneh.de]*"'
             }
         }
     }catch(Exception ex){
         updateGitlabCommitStatus name: 'test', state: 'failed', sha: commitId
         if(env.BRANCH_NAME == 'master'){
             updateGitlabCommitStatus name: 'containerize', state: 'canceled', sha: commitId
-          //  updateGitlabCommitStatus name: 'deploy', state: 'canceled', sha: commitId
         }
         updateGitlabCommitStatus name: 'clean', state: 'canceled', sha: commitId
         currentBuild.result = 'FAILURE'
@@ -97,21 +93,18 @@ node {
 
     try{
         if(env.BRANCH_NAME == 'master'){
-            stage('Docker'){
-                mvnHome = env.BUILD_NUMBER
-                updateGitlabCommitStatus name: 'containerize', state: 'running', sha: commitId
-		        sh "docker build -t docker.qaybe.de/stack.air:0.0.${mvnHome} ."
-                
-                withDockerRegistry(credentialsId: 'DockerRegistry', toolName: 'QaybeDocker', url: 'https://docker.qaybe.de') {
-	                sh "docker push docker.qaybe.de/stack.air:0.0.${mvnHome}"   
+            stage('containerize'){
+                gitlabCommitStatus("containerize") {
+                    mvnHome = env.BUILD_NUMBER
+                    sh "docker build -t docker.qaybe.de/stack.air:0.0.${mvnHome} ."
+                    withDockerRegistry(credentialsId: 'DockerRegistry', toolName: 'QaybeDocker', url: 'https://docker.qaybe.de') {
+                        sh "docker push docker.qaybe.de/stack.air:0.0.${mvnHome}"   
+                    }
                 }
-
-                updateGitlabCommitStatus name: 'containerize', state: 'success', sha: commitId
             }
         }
     }catch(Exception ex){
         updateGitlabCommitStatus name: 'containerize', state: 'failed', sha: commitId
-       // updateGitlabCommitStatus name: 'deploy', state: 'canceled', sha: commitId
         updateGitlabCommitStatus name: 'clean', state: 'canceled', sha: commitId
         currentBuild.result = 'FAILURE'
         echo "RESULT: ${currentBuild.result}"
@@ -119,15 +112,15 @@ node {
     }
     
     try{
-        stage('Clean Up'){
-        updateGitlabCommitStatus name: 'clean', state: 'running', sha: commitId
-            cleanWs()
-        updateGitlabCommitStatus name: 'clean', state: 'success', sha: commitId
+        stage('clean'){
+            stage('clean'){
+                cleanWs()
+            }
         }
     }catch(Exception ex){
         updateGitlabCommitStatus name: 'clean', state: 'failed', sha: commitId
         currentBuild.result = 'FAILURE'
         echo "RESULT: ${currentBuild.result}"
         return
-    }        
+    }
 }
