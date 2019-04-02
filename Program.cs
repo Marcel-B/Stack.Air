@@ -11,13 +11,23 @@ namespace com.b_velop.stack.Air
     {
         public static void Main(string[] args)
         {
-            var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            var file = string.Empty;
+            if (env == "Development")
+                file = "nlog-dev.config";
+            else
+                file = "nlog.config";
+
+            var logger = NLogBuilder.ConfigureNLog(file).GetCurrentClassLogger();
             try
             {
-                var metricServer = new MetricPusher(
-                    endpoint: "https://push.qaybe.de/metrics",
-                    job: "stack_air");
-                metricServer.Start();
+                if (env != "Development")
+                {
+                    var metricServer = new MetricPusher(
+                        endpoint: "https://push.qaybe.de/metrics",
+                        job: "stack_air");
+                    metricServer.Start();
+                }
 
                 logger.Debug("init main");
                 CreateWebHostBuilder(args)

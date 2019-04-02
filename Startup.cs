@@ -45,7 +45,10 @@ namespace com.b_velop.stack.Air
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseMetircCollector();
+            else
+            {
+                app.UseMetircCollector();
+            }
             app.UseMvc();
         }
     }
