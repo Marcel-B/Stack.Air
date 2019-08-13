@@ -14,11 +14,15 @@ namespace com.b_velop.stack.Air
 {
     public class Startup
     {
+        private readonly IHostingEnvironment _env;
+
         public IConfiguration Configuration { get; }
 
         public Startup(
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IHostingEnvironment env)
         {
+            _env = env;
             Configuration = configuration;
         }
 
@@ -29,8 +33,17 @@ namespace com.b_velop.stack.Air
         {
             services.AddSingleton<IUploadService, UploadService>();
             services.AddHttpClient<IIdentityProviderService, IdentityProviderService>();
-            services.Configure<ApiSecret>(Configuration.GetSection("ApiSecret"));
-            var url = Configuration.GetSection("ApiSecret").GetSection("GraphQLUrl").Value;
+            var url = string.Empty;
+            if (_env.IsDevelopment())
+            {
+                services.Configure<ApiSecret>(Configuration.GetSection("ApiSecret-dev"));
+                url = Configuration.GetSection("ApiSecret-dev").GetSection("GraphQLUrl").Value;
+            }
+            else
+            {
+                services.Configure<ApiSecret>(Configuration.GetSection("ApiSecret"));
+                url = Configuration.GetSection("ApiSecret").GetSection("GraphQLUrl").Value;
+            }
             services.AddSingleton(new GraphQLClient(url));
             services.AddSingleton<GraphQLRequest>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
