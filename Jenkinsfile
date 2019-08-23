@@ -111,12 +111,12 @@ node {
         return
     }
     
-    try{
-        stage('clean'){
-            stage('clean'){
-                cleanWs()
-            }
-        }
+ try{
+     stage('clean'){
+         gitlabCommitStatus("clean") {
+             cleanWs()
+         }
+     }
     }catch(Exception ex){
         updateGitlabCommitStatus name: 'clean', state: 'failed', sha: commitId
         currentBuild.result = 'FAILURE'

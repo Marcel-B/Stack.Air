@@ -1,20 +1,23 @@
-﻿FROM microsoft/dotnet:sdk AS build-env
+﻿FROM microsoft/dotnet:2.2-aspnetcore-runtime AS base
+#FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-stretch-slim AS base
 WORKDIR /app
-
 EXPOSE 6000
 
-# Copy csproj and restore as distinct layers
-COPY *.csproj ./
-COPY NuGet.config ./
-RUN dotnet restore --configfile NuGet.config
+FROM microsoft/dotnet:2.2-sdk AS build
 
-# Copy everything else and build
-COPY . .
-RUN dotnet publish -c Release -o out
+#FROM mcr.microsoft.com/dotnet/core/sdk:2.2-stretch AS build
+WORKDIR /src
+COPY Air.csproj Air/
+COPY ["NuGet.config", "Air/"]
+RUN dotnet restore "Air/Air.csproj" --configfile Air/NuGet.config
+COPY . "Air"
+WORKDIR "/src/Air"
+RUN dotnet build "Air.csproj" -c Release -o /app
 
-# Build runtime image
-FROM microsoft/dotnet:aspnetcore-runtime
+FROM build AS publish
+RUN dotnet publish "Air.csproj" -c Release -o /app
+
+FROM base AS final
 WORKDIR /app
-COPY --from=build-env /app/out .
-
+COPY --from=publish /app .
 ENTRYPOINT ["dotnet", "Air.dll"]
