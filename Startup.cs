@@ -46,6 +46,7 @@ namespace com.b_velop.stack.Air
             }
             services.AddSingleton(new GraphQLClient(url));
             services.AddSingleton<GraphQLRequest>();
+            services.AddMemoryCache();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
