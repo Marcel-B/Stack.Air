@@ -59,7 +59,7 @@ namespace com.b_velop.stack.Air.Services
             _graphQlClient = graphQlClient;
             _graphQlRequest = graphQlRequest;
             _graphQlRequest.Query = Query.CreateMeasureValueBunch;
-                //@"mutation AddValue($measure: MeasureValueInput!) { createMeasureValue(measureValueType: $measure){id}}";
+            //@"mutation AddValue($measure: MeasureValueInput!) { createMeasureValue(measureValueType: $measure){id}}";
             //_graphQlRequest.OperationName = "AddValue";
             _service = service;
             _apiSecret = apiSecret.Value;
@@ -94,10 +94,9 @@ namespace com.b_velop.stack.Air.Services
         {
             var uploadValues = new List<double>();
             var uploadPoints = new List<Guid>();
-
-            foreach (var item in airdata.Sensordatavalues)
+            try
             {
-                try
+                foreach (var item in airdata.Sensordatavalues)
                 {
                     if (!_map.ContainsKey(item.ValueType))
                         continue;
@@ -105,19 +104,19 @@ namespace com.b_velop.stack.Air.Services
                         continue;
                     uploadValues.Add(value);
                     uploadPoints.Add(_map[item.ValueType]);
-
-                    if (uploadValues.Count == 0)
-                        return;
-
-                    _graphQlRequest.Variables = new { points = uploadPoints, values = uploadValues };
-                    var result = await _graphQlClient.PostAsync(_graphQlRequest);
-                    _logger.LogInformation($"Uploaded '{uploadValues.Count}' air values with status code {result}");
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(2422, ex, $"Error while inserting Luftdaten '{item.ValueType}: {item.Value}'", airdata);
+
+                if (uploadValues.Count == 0)
                     return;
-                }
+
+                _graphQlRequest.Variables = new { points = uploadPoints, values = uploadValues };
+                var result = await _graphQlClient.PostAsync(_graphQlRequest);
+                _logger.LogInformation($"Uploaded '{uploadValues.Count}' air values with status code {result}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(2422, ex, $"Error while inserting '{uploadPoints.Count}' Luftdaten", airdata);
+                return;
             }
         }
 
