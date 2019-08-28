@@ -111,7 +111,7 @@ namespace com.b_velop.stack.Air.Services
 
                 _graphQlRequest.Variables = new { points = uploadPoints, values = uploadValues };
                 var result = await _graphQlClient.PostAsync(_graphQlRequest);
-                _logger.LogInformation($"Uploaded '{uploadValues.Count}' air values with status code {result}");
+                _logger.LogInformation($"Uploaded '{uploadValues.Count}' air values");
             }
             catch (Exception ex)
             {
