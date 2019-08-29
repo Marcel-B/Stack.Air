@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using com.b_velop.stack.Air.Services;
 using com.b_velop.App.IdentityProvider;
@@ -8,7 +7,8 @@ using com.b_velop.stack.Air.BL;
 using Microsoft.Extensions.Configuration;
 using GraphQL.Client;
 using GraphQL.Common.Request;
-using com.b_velop.stack.Air.Middlewares;
+using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.AspNetCore.Mvc;
 
 namespace com.b_velop.stack.Air
 {
@@ -26,8 +26,6 @@ namespace com.b_velop.stack.Air
             Configuration = configuration;
         }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(
             IServiceCollection services)
         {
@@ -44,25 +42,37 @@ namespace com.b_velop.stack.Air
                 services.Configure<ApiSecret>(Configuration.GetSection("ApiSecret"));
                 url = Configuration.GetSection("ApiSecret").GetSection("GraphQLUrl").Value;
             }
+
             services.AddSingleton(new GraphQLClient(url));
             services.AddSingleton<GraphQLRequest>();
             services.AddMemoryCache();
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddMvc(
+                options => options.EnableEndpointRouting = false
+            ).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "Air API", Version = "v1" });
+            });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(
             IApplicationBuilder app,
             IHostingEnvironment env)
         {
+            app.UseSwagger();
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Air API V1");
+            });
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-            else
-            {
-                app.UseMetircCollector();
-            }
+
             app.UseMvc();
         }
     }

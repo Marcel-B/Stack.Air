@@ -1,37 +1,52 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using com.b_velop.stack.Air.Constants;
 using com.b_velop.stack.Air.Services;
 using com.b_velop.stack.Classes.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace com.b_velop.stack.Air.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Produces("application/json")]
     public class AirController : Controller
     {
-        private readonly ILogger<AirController> _logger;
         private readonly IUploadService _service;
+        private readonly IMemoryCache _cache;
+        private readonly ILogger<AirController> _logger;
 
         public AirController(
             IUploadService service,
+            IMemoryCache cache,
             ILogger<AirController> logger
         )
         {
-            _logger = logger;
             _service = service;
+            _cache = cache;
+            _logger = logger;
         }
 
         // GET: api/air
-        [HttpGet]
+        [HttpGet(Name = "GetLastValues")]
+        [ProducesResponseType(typeof(Dictionary<string, double>), 200)]
+        [ProducesResponseType(500)]
         public IActionResult Get()
-            => Ok();
+        {
+            if (!_cache.TryGetValue(Memory.Values, out Dictionary<string, double> values))
+            {
+                return new StatusCodeResult(500);
+            }
+            return new JsonResult(values);
+        }
 
         // POST api/air
-        [HttpPost]
+        [HttpPost()]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> Post(
             [FromBody]AirdataDto value)
         {

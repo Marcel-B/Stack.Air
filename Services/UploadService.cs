@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using com.b_velop.App.IdentityProvider;
 using com.b_velop.App.IdentityProvider.Model;
 using com.b_velop.stack.Air.BL;
+using com.b_velop.stack.Air.Constants;
 using com.b_velop.stack.Classes.Dtos;
 using GraphQL.Client;
 using GraphQL.Common.Request;
@@ -39,6 +40,7 @@ namespace com.b_velop.stack.Air.Services
         private DateTime _exp;
         private IMemoryCache _cache;
         private IDictionary<string, Guid> _map;
+
         public UploadService(
             GraphQLRequest graphQlRequest,
             GraphQLClient graphQlClient,
@@ -94,6 +96,7 @@ namespace com.b_velop.stack.Air.Services
         {
             var uploadValues = new List<double>();
             var uploadPoints = new List<Guid>();
+            var values = new Dictionary<string, double>();
             try
             {
                 foreach (var item in airdata.Sensordatavalues)
@@ -104,11 +107,13 @@ namespace com.b_velop.stack.Air.Services
                         continue;
                     uploadValues.Add(value);
                     uploadPoints.Add(_map[item.ValueType]);
+                    values[item.ValueType] = value;
                 }
 
                 if (uploadValues.Count == 0)
                     return;
 
+                _cache.Set(Memory.Values, values);
                 _graphQlRequest.Variables = new { points = uploadPoints, values = uploadValues };
                 var result = await _graphQlClient.PostAsync(_graphQlRequest);
                 _logger.LogInformation($"Uploaded '{uploadValues.Count}' air values");
@@ -124,20 +129,22 @@ namespace com.b_velop.stack.Air.Services
             AirdataDto airdata,
             DateTimeOffset timestamp)
         {
-            if (!_cache.TryGetValue("token", out Token token))
+            if (!_cache.TryGetValue(Memory.Token, out Token token))
             {
                 token = await UpdateTokenAsync();
-                _cache.Set("token", token);
-                _cache.Set("time", DateTime.Now.AddSeconds(token.ExpiresIn));
+                _cache.Set(Memory.Token, token);
+                _cache.Set(Memory.Time, DateTime.Now.AddSeconds(token.ExpiresIn));
             }
-            if (!_cache.TryGetValue("time", out DateTime time) || time <= DateTime.Now)
+            if (!_cache.TryGetValue(Memory.Time, out DateTime time) || time <= DateTime.Now)
             {
                 token = await UpdateTokenAsync();
-                _cache.Set("token", token);
-                _cache.Set("time", DateTime.Now.AddSeconds(token.ExpiresIn));
+                _cache.Set(Memory.Token, token);
+                _cache.Set(Memory.Time, DateTime.Now.AddSeconds(token.ExpiresIn));
             }
+
             _graphQlClient.DefaultRequestHeaders.Clear();
             _graphQlClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.AccessToken);
+
             await ProcessDataAsync(airdata);
             return true;
         }

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
-using Prometheus;
 
 namespace com.b_velop.stack.Air
 {
@@ -21,18 +20,10 @@ namespace com.b_velop.stack.Air
             var logger = NLogBuilder.ConfigureNLog(file).GetCurrentClassLogger();
             try
             {
-                if (env != "Development")
-                {
-                    var metricServer = new MetricPusher(
-                        endpoint: "https://push.qaybe.de/metrics",
-                        job: "stack_air");
-                    metricServer.Start();
-                }
-
                 logger.Debug("init main");
                 CreateWebHostBuilder(args)
-                    .Build()
-                    .Run();
+                .Build()
+                .Run();
             }
             catch (Exception ex)
             {
@@ -49,13 +40,13 @@ namespace com.b_velop.stack.Air
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
           WebHost.CreateDefaultBuilder(args)
-              .UseUrls("http://*:6000")
+              .UseUrls("http://*:5063")
               .UseStartup<Startup>()
               .ConfigureLogging((hostingContext, logging) =>
               {
-                  logging.ClearProviders();
-                  logging.SetMinimumLevel(LogLevel.Trace);
-              })
+            logging.ClearProviders();
+            logging.SetMinimumLevel(LogLevel.Trace);
+        })
               .UseNLog();
     }
 }

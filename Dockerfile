@@ -1,7 +1,7 @@
 ﻿FROM microsoft/dotnet:2.2-aspnetcore-runtime AS base
 #FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-stretch-slim AS base
 WORKDIR /app
-EXPOSE 6000
+EXPOSE 5063
 
 FROM microsoft/dotnet:2.2-sdk AS build
 
