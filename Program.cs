@@ -33,7 +33,6 @@ namespace com.b_velop.stack.Air
             }
             finally
             {
-                // Ensure to flush and stop internal timers/threads before application-exit (Avoid segmentation fault on Linux)
                 NLog.LogManager.Shutdown();
             }
         }
@@ -44,9 +43,9 @@ namespace com.b_velop.stack.Air
               .UseStartup<Startup>()
               .ConfigureLogging((hostingContext, logging) =>
               {
-            logging.ClearProviders();
-            logging.SetMinimumLevel(LogLevel.Trace);
-        })
+                  logging.ClearProviders();
+                  logging.SetMinimumLevel(LogLevel.Trace);
+              })
               .UseNLog();
     }
 }

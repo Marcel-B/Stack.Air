@@ -31,17 +31,21 @@ namespace com.b_velop.stack.Air
         {
             services.AddSingleton<IUploadService, UploadService>();
             services.AddHttpClient<IIdentityProviderService, IdentityProviderService>();
-            var url = string.Empty;
-            if (_env.IsDevelopment())
+
+            var clientId = System.Environment.GetEnvironmentVariable("ClientId");
+            var scope = System.Environment.GetEnvironmentVariable("Scope");
+            var secret = System.Environment.GetEnvironmentVariable("Secret");
+            var issuer = System.Environment.GetEnvironmentVariable("Issuer");
+            var url = System.Environment.GetEnvironmentVariable("GraphQLUrl");
+
+            services.AddScoped(_ => new ApiSecret
             {
-                services.Configure<ApiSecret>(Configuration.GetSection("ApiSecret-dev"));
-                url = Configuration.GetSection("ApiSecret-dev").GetSection("GraphQLUrl").Value;
-            }
-            else
-            {
-                services.Configure<ApiSecret>(Configuration.GetSection("ApiSecret"));
-                url = Configuration.GetSection("ApiSecret").GetSection("GraphQLUrl").Value;
-            }
+                AuthorityUrl = issuer,
+                ClientId = clientId,
+                ClientSecret = secret,
+                GraphQLUrl = url,
+                Scope = scope
+            });
 
             services.AddSingleton(new GraphQLClient(url));
             services.AddSingleton<GraphQLRequest>();
