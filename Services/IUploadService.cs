@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using com.b_velop.stack.Classes.Dtos;
+using com.b_velop.Home.Classes;
 
 namespace com.b_velop.stack.Air.Services
 {
     public interface IUploadService
     {
-        Task<bool> UploadAsync(AirdataDto data, DateTimeOffset timestamp);
+        Task<bool> UploadAsync(Airdata data, DateTimeOffset timestamp);
     }
 }
