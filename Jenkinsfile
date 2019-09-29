@@ -1,5 +1,4 @@
-node {
-
+node{
     def mvnHome
     def commitId
     
@@ -11,7 +10,7 @@ node {
 
     try{
         stage('restore') {
-            sh 'dotnet restore' --configfile NuGet.config
+            sh 'dotnet restore --configfile NuGet.config'
         }
     }catch(Exception ex){
         currentBuild.result = 'FAILURE'
