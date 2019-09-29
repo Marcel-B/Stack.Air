@@ -6,9 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using com.b_velop.App.IdentityProvider;
 using com.b_velop.App.IdentityProvider.Model;
+using com.b_velop.Home.Classes;
 using com.b_velop.stack.Air.BL;
 using com.b_velop.stack.Air.Constants;
-using com.b_velop.stack.Classes.Dtos;
 using GraphQL.Client;
 using GraphQL.Common.Request;
 using Microsoft.Extensions.Caching.Memory;
@@ -17,17 +17,6 @@ using Microsoft.Extensions.Options;
 
 namespace com.b_velop.stack.Air.Services
 {
-    public class Query
-    {
-        public const string ActiveMeasurePoints = "{ activeMeasurePoints { id isActive point { id externId } } }";
-        public const string MeasurePoints = "{ measurePoints {id externId } }";
-
-        public const string CreateMeasureValue = "mutation CreateMeasureValue($value: Float!, $point: ID!) { createEasyMeasureValue(pointId: $point, value: $value) { id } }";
-
-        public const string CreateMeasureValueBunch = "mutation InsertMeasureValueBunch($values: [Float]!, $points: [ID]!) { createMeasureValueBunch(values: $values, points: $points) { id } }";
-
-        public const string UpdateBatteryStateBunch = "mutation UpdateBatteryStateBunch($states: [Boolean]!, $ids: [ID]!, $timestamps: [DateTimeOffset]!) { updateBatteryStateBunch(states: $states, ids: $ids, timestamps: $timestamps) { id } }";
-    }
 
     public class UploadService : IUploadService
     {
@@ -92,7 +81,7 @@ namespace com.b_velop.stack.Air.Services
         }
 
         public async Task ProcessDataAsync(
-            AirdataDto airdata)
+            Airdata airdata)
         {
             var uploadValues = new List<double>();
             var uploadPoints = new List<Guid>();
@@ -126,7 +115,7 @@ namespace com.b_velop.stack.Air.Services
         }
 
         public async Task<bool> UploadAsync(
-            AirdataDto airdata,
+            Airdata airdata,
             DateTimeOffset timestamp)
         {
             if (!_cache.TryGetValue(Memory.Token, out Token token))

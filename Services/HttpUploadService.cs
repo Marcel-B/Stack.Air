@@ -6,8 +6,7 @@ using Microsoft.Extensions.Logging;
 using System.Net.Http;
 using System.Threading.Tasks;
 using com.b_velop.App.IdentityProvider.Model;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using com.b_velop.stack.Classes.Dtos;
+using com.b_velop.Home.Classes;
 
 namespace com.b_velop.stack.Air.Services
 {
@@ -63,7 +62,7 @@ namespace com.b_velop.stack.Air.Services
         }
 
         public async Task<bool> UploadValuesAsync(
-            AirdataDto values)
+            Airdata values)
         {
             try
             {
