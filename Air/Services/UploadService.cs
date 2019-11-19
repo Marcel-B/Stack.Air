@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
-using com.b_velop.App.IdentityProvider;
-using com.b_velop.App.IdentityProvider.Model;
 using com.b_velop.Home.Classes;
+using com.b_velop.IdentityProvider;
+using com.b_velop.IdentityProvider.Model;
 using com.b_velop.stack.Air.BL;
 using com.b_velop.stack.Air.Constants;
 using GraphQL.Client;

@@ -2,13 +2,13 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using com.b_velop.stack.Air.Services;
-using com.b_velop.App.IdentityProvider;
 using com.b_velop.stack.Air.BL;
 using Microsoft.Extensions.Configuration;
 using GraphQL.Client;
 using GraphQL.Common.Request;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.AspNetCore.Mvc;
+using com.b_velop.IdentityProvider;
 
 namespace com.b_velop.stack.Air
 {
