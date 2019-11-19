@@ -10,7 +10,7 @@ node{
 
     try{
         stage('restore') {
-            sh 'dotnet restore --configfile NuGet.config'
+            sh 'dotnet restore --configfile ./Air/NuGet.config'
         }
     }catch(Exception ex){
         currentBuild.result = 'FAILURE'
