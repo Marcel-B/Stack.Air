@@ -1,6 +1,6 @@
 ﻿using System;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
 
@@ -21,7 +21,7 @@ namespace com.b_velop.stack.Air
             try
             {
                 logger.Debug("init main");
-                CreateWebHostBuilder(args)
+                CreateHostBuilder(args)
                 .Build()
                 .Run();
             }
@@ -37,10 +37,13 @@ namespace com.b_velop.stack.Air
             }
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-          WebHost.CreateDefaultBuilder(args)
-              .UseUrls("http://*:5063")
-              .UseStartup<Startup>()
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+          Host.CreateDefaultBuilder(args)
+             .ConfigureWebHostDefaults(webBuilder =>
+             {
+                 webBuilder.UseStartup<Startup>();
+                 webBuilder.UseUrls("http://*:5063");
+             })
               .ConfigureLogging((hostingContext, logging) =>
               {
                   logging.ClearProviders();
