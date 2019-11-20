@@ -42,6 +42,7 @@ namespace com.b_velop.stack.Air
              .ConfigureWebHostDefaults(webBuilder =>
              {
                  webBuilder.UseStartup<Startup>();
+                 webBuilder.UseUrls("http://*:5063");
              })
               .ConfigureLogging((hostingContext, logging) =>
               {
