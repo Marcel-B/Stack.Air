@@ -13,7 +13,7 @@ namespace com.b_velop.stack.Air
             var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             var file = string.Empty;
             if (env == "Development")
-                file = "nlog-dev.config";
+                file = "nlog.config";
             else
                 file = "nlog.config";
 
@@ -42,6 +42,7 @@ namespace com.b_velop.stack.Air
              .ConfigureWebHostDefaults(webBuilder =>
              {
                  webBuilder.UseStartup<Startup>();
+                 webBuilder.UseUrls("http://*:5063");
              })
               .ConfigureLogging((hostingContext, logging) =>
               {

@@ -38,7 +38,7 @@ namespace com.b_velop.stack.Air
             var scope = System.Environment.GetEnvironmentVariable("Scope");
             var secret = System.Environment.GetEnvironmentVariable("Secret");
             var issuer = System.Environment.GetEnvironmentVariable("Issuer");
-            var url = System.Environment.GetEnvironmentVariable("GraphQLUrl");
+            var url = System.Environment.GetEnvironmentVariable("GraphQLUrl") ?? "https://data.qaybe.de/graphql";
             services.AddScoped(_ => new ApiSecret
             {
                 AuthorityUrl = issuer,
@@ -51,39 +51,40 @@ namespace com.b_velop.stack.Air
             services.AddSingleton(new GraphQLClient(url));
             services.AddSingleton<GraphQLRequest>();
             services.AddMemoryCache();
-
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Air API", Version = "v1" });
+            });
             services.AddControllers();
             services.AddMvc(
                 options => options.EnableEndpointRouting = false
             );
 
-            //services.AddSwaggerGen(c =>
-            //{
-            //    c.SwaggerDoc("v1", new Info { Title = "Air API", Version = "v1" });
-            //});
+            
         }
 
         public void Configure(
             IApplicationBuilder app,
             IWebHostEnvironment env)
         {
-            //app.UseSwagger();
+            
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
 
-            //app.UseSwaggerUI(c =>
-            //{
-            //    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Air API V1");
-            //});
+            
 
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Air API v1");
+            });
             app.UseMvc();
         }
     }
