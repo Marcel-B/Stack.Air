@@ -19,16 +19,13 @@ namespace com.b_velop.stack.Air
 
         public IConfiguration Configuration { get; }
 
-        private Logger<Startup> _logger;
 
         public Startup(
             IConfiguration configuration,
-            IWebHostEnvironment env,
-            Logger<Startup> logger)
+            IWebHostEnvironment env)
         {
             _env = env;
             Configuration = configuration;
-            _logger = logger;
         }
 
         public void ConfigureServices(
@@ -42,10 +39,6 @@ namespace com.b_velop.stack.Air
             var secret = System.Environment.GetEnvironmentVariable("Secret");
             var issuer = System.Environment.GetEnvironmentVariable("Issuer");
             var url = System.Environment.GetEnvironmentVariable("GraphQLUrl");
-            _logger.LogInformation(clientId);
-            _logger.LogInformation(scope);
-            _logger.LogInformation(url);
-            _logger.LogInformation(secret);
             services.AddScoped(_ => new ApiSecret
             {
                 AuthorityUrl = issuer,
@@ -64,27 +57,27 @@ namespace com.b_velop.stack.Air
                 options => options.EnableEndpointRouting = false
             );
 
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new Info { Title = "Air API", Version = "v1" });
-            });
+            //services.AddSwaggerGen(c =>
+            //{
+            //    c.SwaggerDoc("v1", new Info { Title = "Air API", Version = "v1" });
+            //});
         }
 
         public void Configure(
             IApplicationBuilder app,
             IWebHostEnvironment env)
         {
-            app.UseSwagger();
+            //app.UseSwagger();
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
 
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Air API V1");
-            });
+            //app.UseSwaggerUI(c =>
+            //{
+            //    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Air API V1");
+            //});
 
             if (env.IsDevelopment())
             {
