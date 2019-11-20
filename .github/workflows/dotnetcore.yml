@@ -14,10 +14,8 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.0.100
-    - name: Add
-      run: nuget sources Add -Name "Github"  -Source "https://nuget.pkg.github.com/Marcel-B/index.json"  -UserName Marcel-B -Password c648e018dbfbf25ebd90957ad16cb85e28c15342
     - name: Restore
-      run: dotnet restore  --configfile NuGet.config
+      run: dotnet restore
     - name: Build with dotnet
       run: dotnet build --configuration Release
     - name: Test with dotnet
