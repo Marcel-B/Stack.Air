@@ -32,7 +32,7 @@ namespace com.b_velop.stack.Air.Services
         public UploadService(
             GraphQLRequest graphQlRequest,
             GraphQLClient graphQlClient,
-            IOptions<ApiSecret> apiSecret,
+            ApiSecret apiSecret,
             IIdentityProviderService service,
             IMemoryCache cache,
             ILogger<UploadService> logger)
@@ -52,7 +52,7 @@ namespace com.b_velop.stack.Air.Services
             //@"mutation AddValue($measure: MeasureValueInput!) { createMeasureValue(measureValueType: $measure){id}}";
             //_graphQlRequest.OperationName = "AddValue";
             _service = service;
-            _apiSecret = apiSecret.Value;
+            _apiSecret = apiSecret;
             _cache = cache;
             _logger = logger;
             _exp = DateTime.MinValue;

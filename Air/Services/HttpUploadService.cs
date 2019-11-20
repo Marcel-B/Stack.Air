@@ -23,13 +23,13 @@ namespace com.b_velop.stack.Air.Services
             HttpClient client,
             ILogger<HttpUploadService> logger,
             IIdentityProviderService identity,
-            IOptions<ApiSecret> secret)
+            ApiSecret secret)
         {
             _client = client;
             _client.Timeout = TimeSpan.FromSeconds(5);
             _logger = logger;
             _identity = identity;
-            _secret = secret.Value;
+            _secret = secret;
         }
 
         public async Task<bool> TryRequestTokenAsync()
