@@ -1,6 +1,6 @@
 ﻿FROM mcr.microsoft.com/dotnet/core/aspnet:3.0 AS base
 #FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-stretch-slim AS base
-EXPOSE 5063
+EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS build
 

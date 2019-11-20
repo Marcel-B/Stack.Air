@@ -9,6 +9,7 @@ using GraphQL.Common.Request;
 using Swashbuckle.AspNetCore.Swagger;
 using com.b_velop.IdentityProvider;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace com.b_velop.stack.Air
 {
@@ -18,12 +19,16 @@ namespace com.b_velop.stack.Air
 
         public IConfiguration Configuration { get; }
 
+        private Logger<Startup> _logger;
+
         public Startup(
             IConfiguration configuration,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,
+            Logger<Startup> logger)
         {
             _env = env;
             Configuration = configuration;
+            _logger = logger;
         }
 
         public void ConfigureServices(
@@ -37,7 +42,10 @@ namespace com.b_velop.stack.Air
             var secret = System.Environment.GetEnvironmentVariable("Secret");
             var issuer = System.Environment.GetEnvironmentVariable("Issuer");
             var url = System.Environment.GetEnvironmentVariable("GraphQLUrl");
-
+            _logger.LogInformation(clientId);
+            _logger.LogInformation(scope);
+            _logger.LogInformation(url);
+            _logger.LogInformation(secret);
             services.AddScoped(_ => new ApiSecret
             {
                 AuthorityUrl = issuer,
