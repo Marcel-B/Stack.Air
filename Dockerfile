@@ -1,8 +1,8 @@
-﻿FROM microsoft/dotnet:2.2-aspnetcore-runtime AS base
+﻿FROM mcr.microsoft.com/dotnet/core/aspnet:3.0 AS base
 #FROM mcr.microsoft.com/dotnet/core/aspnet:2.2-stretch-slim AS base
 EXPOSE 5063
 
-FROM microsoft/dotnet:2.2-sdk AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.0 AS build
 
 #FROM mcr.microsoft.com/dotnet/core/sdk:2.2-stretch AS build
 WORKDIR /src

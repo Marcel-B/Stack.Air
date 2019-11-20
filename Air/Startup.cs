@@ -7,20 +7,20 @@ using Microsoft.Extensions.Configuration;
 using GraphQL.Client;
 using GraphQL.Common.Request;
 using Swashbuckle.AspNetCore.Swagger;
-using Microsoft.AspNetCore.Mvc;
 using com.b_velop.IdentityProvider;
+using Microsoft.Extensions.Hosting;
 
 namespace com.b_velop.stack.Air
 {
     public class Startup
     {
-        private readonly IHostingEnvironment _env;
+        private readonly IWebHostEnvironment _env;
 
         public IConfiguration Configuration { get; }
 
         public Startup(
             IConfiguration configuration,
-            IHostingEnvironment env)
+            IWebHostEnvironment env)
         {
             _env = env;
             Configuration = configuration;
@@ -51,9 +51,10 @@ namespace com.b_velop.stack.Air
             services.AddSingleton<GraphQLRequest>();
             services.AddMemoryCache();
 
+            services.AddControllers();
             services.AddMvc(
                 options => options.EnableEndpointRouting = false
-            ).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            );
 
             services.AddSwaggerGen(c =>
             {
@@ -63,9 +64,14 @@ namespace com.b_velop.stack.Air
 
         public void Configure(
             IApplicationBuilder app,
-            IHostingEnvironment env)
+            IWebHostEnvironment env)
         {
             app.UseSwagger();
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
 
             app.UseSwaggerUI(c =>
             {
