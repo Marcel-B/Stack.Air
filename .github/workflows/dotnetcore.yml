@@ -15,7 +15,7 @@ jobs:
       with:
         dotnet-version: 3.0.100
     - name: Restore
-      run: dotnet restore  --configfile NuGet.config
+      run: dotnet restore
     - name: Build with dotnet
       run: dotnet build --configuration Release
     - name: Test with dotnet
