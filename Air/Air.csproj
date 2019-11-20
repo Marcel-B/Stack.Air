@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="NuGet.config" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="IdentityProvider" Version="1.0.1" />
     <PackageReference Include="NLog.StructuredLogging.Json" Version="3.0.0" />
     <PackageReference Include="NLog" Version="4.5.11" />
@@ -27,10 +23,6 @@
     <Folder Include="Services\" />
     <Folder Include="Middlewares\" />
     <Folder Include="Constants\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <File Include="NuGet.config" />
   </ItemGroup>
 
   <ItemGroup>
