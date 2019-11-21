@@ -1,12 +1,11 @@
 ﻿using System;
-using Microsoft.Extensions.Options;
 using com.b_velop.stack.Air.BL;
 using Microsoft.Extensions.Logging;
 using System.Net.Http;
 using System.Threading.Tasks;
 using com.b_velop.IdentityProvider;
 using com.b_velop.IdentityProvider.Model;
-using com.b_velop.stack.Classes;
+using com.b_velop.stack.Air.Models;
 
 namespace com.b_velop.stack.Air.Services
 {
@@ -62,7 +61,7 @@ namespace com.b_velop.stack.Air.Services
         }
 
         public async Task<bool> UploadValuesAsync(
-            Airdata values)
+            AirDto values)
         {
             try
             {

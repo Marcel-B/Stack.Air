@@ -31,7 +31,7 @@ namespace com.b_velop.stack.Air
         public void ConfigureServices(
             IServiceCollection services)
         {
-            services.AddSingleton<IUploadService, UploadService>();
+            services.AddScoped<IUploadService, UploadService>();
             services.AddHttpClient<IIdentityProviderService, IdentityProviderService>();
 
             var clientId = System.Environment.GetEnvironmentVariable("ClientId");

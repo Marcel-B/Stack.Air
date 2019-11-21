@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using com.b_velop.stack.Air.Constants;
+using com.b_velop.stack.Air.Models;
 using com.b_velop.stack.Air.Services;
-using com.b_velop.stack.Classes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -48,10 +48,15 @@ namespace com.b_velop.stack.Air.Controllers
         [ProducesResponseType(200)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> Post(
-            [FromBody]Airdata value)
+            AirDto value)
         {
             try
             {
+                if(value == null)
+                {
+                    _logger.LogWarning(2442, $"No Airdata received.");
+                    return new StatusCodeResult(500);
+                }
                 await _service.UploadAsync(value, DateTimeOffset.Now);
                 return Ok();
             }

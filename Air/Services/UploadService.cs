@@ -7,12 +7,11 @@ using com.b_velop.IdentityProvider;
 using com.b_velop.IdentityProvider.Model;
 using com.b_velop.stack.Air.BL;
 using com.b_velop.stack.Air.Constants;
-using com.b_velop.stack.Classes;
+using com.b_velop.stack.Air.Models;
 using GraphQL.Client;
 using GraphQL.Common.Request;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace com.b_velop.stack.Air.Services
 {
@@ -80,14 +79,14 @@ namespace com.b_velop.stack.Air.Services
         }
 
         public async Task ProcessDataAsync(
-            Airdata airdata)
+            AirDto airdata)
         {
             var uploadValues = new List<double>();
             var uploadPoints = new List<Guid>();
             var values = new Dictionary<string, double>();
             try
             {
-                foreach (var item in airdata.Sensordatavalues)
+                foreach (var item in airdata.SensorDataValues)
                 {
                     if (!_map.ContainsKey(item.ValueType))
                         continue;
@@ -114,7 +113,7 @@ namespace com.b_velop.stack.Air.Services
         }
 
         public async Task<bool> UploadAsync(
-            Airdata airdata,
+            AirDto airdata,
             DateTimeOffset timestamp)
         {
             if (!_cache.TryGetValue(Memory.Token, out Token token))
