@@ -13,7 +13,6 @@
     <PackageReference Include="NLog" Version="4.6.8" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="4.9.0" />
     <PackageReference Include="GraphQL.Client" Version="1.0.3" />
-    <PackageReference Include="Stack.Classes" Version="3.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc4" />
   </ItemGroup>
 
@@ -23,6 +22,7 @@
     <Folder Include="Services\" />
     <Folder Include="Middlewares\" />
     <Folder Include="Constants\" />
+    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="nlog.config">
