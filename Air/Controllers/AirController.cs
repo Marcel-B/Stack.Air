@@ -7,6 +7,7 @@ using com.b_velop.stack.Air.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Prometheus;
 
 namespace com.b_velop.stack.Air.Controllers
 {
@@ -50,20 +51,23 @@ namespace com.b_velop.stack.Air.Controllers
         public async Task<IActionResult> Post(
             AirDto value)
         {
-            try
+            using (Metrics.CreateHistogram("stack_air_POST_air_duration_seconds", "").NewTimer())
             {
-                if(value == null)
+                try
                 {
-                    _logger.LogWarning(2442, $"No Airdata received.");
+                    if (value == null)
+                    {
+                        _logger.LogWarning(2442, $"No Airdata received.");
+                        return new StatusCodeResult(500);
+                    }
+                    await _service.UploadAsync(value, DateTimeOffset.Now);
+                    return Ok();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(2442, ex, $"Error occurred while uploading value '{value}'.", value);
                     return new StatusCodeResult(500);
                 }
-                await _service.UploadAsync(value, DateTimeOffset.Now);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(2442, ex, $"Error occurred while uploading value '{value}'.", value);
-                return new StatusCodeResult(500);
             }
         }
     }

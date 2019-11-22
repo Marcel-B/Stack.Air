@@ -12,6 +12,7 @@ using GraphQL.Client;
 using GraphQL.Common.Request;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using Prometheus;
 
 namespace com.b_velop.stack.Air.Services
 {
@@ -59,22 +60,25 @@ namespace com.b_velop.stack.Air.Services
 
         public async Task<Token> UpdateTokenAsync()
         {
-            await SemaphoreSlim.WaitAsync();
-            try
+            using (Metrics.CreateHistogram("stack_air_update_token_async_duration_seconds", "").NewTimer())
             {
-                var infoItem = new InfoItem(_apiSecret.ClientId, _apiSecret.ClientSecret, _apiSecret.Scope, _apiSecret.AuthorityUrl);
-                var url = _apiSecret.GraphQLUrl;
-                var token = await _service.GetTokenAsync(infoItem);
-                if (token == null)
+                await SemaphoreSlim.WaitAsync();
+                try
                 {
-                    _logger.LogError(2432, "Error occurred while fetch token.");
-                    return null;
+                    var infoItem = new InfoItem(_apiSecret.ClientId, _apiSecret.ClientSecret, _apiSecret.Scope, _apiSecret.AuthorityUrl);
+                    var url = _apiSecret.GraphQLUrl;
+                    var token = await _service.GetTokenAsync(infoItem);
+                    if (token == null)
+                    {
+                        _logger.LogError(2432, "Error occurred while fetch token.");
+                        return null;
+                    }
+                    return token;
                 }
-                return token;
-            }
-            finally
-            {
-                SemaphoreSlim.Release();
+                finally
+                {
+                    SemaphoreSlim.Release();
+                }
             }
         }
 

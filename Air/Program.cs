@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
+using Prometheus;
 
 namespace com.b_velop.stack.Air
 {
@@ -21,6 +22,13 @@ namespace com.b_velop.stack.Air
             try
             {
                 logger.Debug("init main");
+                if (env != "Development")
+                {
+                    var metricServer = new MetricPusher(
+                        endpoint: "https://push.qaybe.de/metrics",
+                        job: "Stack.Air");
+                    metricServer.Start();
+                }
                 CreateHostBuilder(args)
                 .Build()
                 .Run();
