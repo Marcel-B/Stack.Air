@@ -10,6 +10,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using com.b_velop.IdentityProvider;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Prometheus;
 
 namespace com.b_velop.stack.Air
 {
@@ -60,25 +61,40 @@ namespace com.b_velop.stack.Air
                 options => options.EnableEndpointRouting = false
             );
 
-            
+
         }
 
         public void Configure(
             IApplicationBuilder app,
             IWebHostEnvironment env)
         {
-            
+
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
 
-            
+
 
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseMetricServer();
+                app.UseHttpMetrics(options =>
+                {
+                    options.RequestCount.Enabled = false;
+
+                    options.RequestDuration.Histogram = Metrics.CreateHistogram("stack_air_http_request_duration_seconds", "Some help text",
+                        new HistogramConfiguration
+                        {
+                            Buckets = Histogram.LinearBuckets(start: 1, width: 1, count: 64),
+                            LabelNames = new[] { "code", "method" }
+                        });
+                });
             }
             app.UseSwagger();
             app.UseSwaggerUI(c =>
