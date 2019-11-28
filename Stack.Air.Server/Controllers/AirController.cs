@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
 using System.Threading.Tasks;
+using com.b_velop.stack.DataContext.Entities;
+using com.b_velop.stack.DataContext.Repository;
 using com.b_velop.Stack.Air.Server.Models.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,73 +12,82 @@ using Prometheus;
 
 namespace Stack.Air.Server.Controllers
 {
+    public static class SensorTypes
+    {
+        public const string SdsP1 = "SDS_P1";
+        public const string SdsP2 = "SDS_P2";
+        public const string Humidity = "humidity";
+        public const string Temperature = "temperature";
+        public const string BmpPressure = "BMP_pressure";
+        public const string BmpTemperature = "BMP_temperature";
+    }
+
     [ApiController]
     [Route("[controller]")]
     [Authorize]
     public class AirController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
+        private readonly IRepositoryWrapper _rep;
         private readonly ILogger<AirController> _logger;
 
-        public AirController(ILogger<AirController> logger)
+        public AirController(
+            IRepositoryWrapper rep,
+            ILogger<AirController> logger)
         {
+            _rep = rep;
             _logger = logger;
         }
 
         [HttpPost]
         public async Task<ActionResult> PostAsync(
-            AirDto value)
+            AirDto airData)
         {
             using (Metrics.CreateHistogram("stack_air_POST_air_duration_seconds", "").NewTimer())
             {
-                var uploadValues = new List<double>();
-                var uploadPoints = new List<Guid>();
-                var values = new Dictionary<string, double>();
+                var measureValues = new List<MeasureValue>();
                 try
                 {
-                    foreach (var item in value.SensorDataValues)
+                    foreach (var sensorData in airData.SensorDataValues)
                     {
-                        if (!_map.ContainsKey(item.ValueType))
+                        var sensorId = sensorData.ValueType switch
+                        {
+                            SensorTypes.SdsP1 => new Guid("777CECC4-C140-477D-BD94-5A0A611F47FC"),
+                            SensorTypes.SdsP2 => new Guid("FB43A587-8251-4EA1-97B2-6F2F702952A6"),
+                            SensorTypes.Humidity => new Guid("795F28B0-77ED-4A57-AF57-32A2C47CDBA0"),
+                            SensorTypes.Temperature => new Guid("6E78294C-0AB6-4E71-A790-EA099D0693A6"),
+                            SensorTypes.BmpPressure => new Guid("516C6AB3-E615-462E-8718-63FD85220D6A"),
+                            SensorTypes.BmpTemperature => new Guid("8FA026A5-BA9F-476A-AB7F-27406C3CEA91"),
+                            _ => Guid.Empty
+                        };
+
+                        if (sensorId == Guid.Empty)
                             continue;
-                        if (!double.TryParse(item.Value, NumberStyles.Any, CultureInfo.CreateSpecificCulture("en-GB"), out var value))
+
+                        if (!double.TryParse(sensorData.Value, NumberStyles.Any, CultureInfo.CreateSpecificCulture("en-GB"), out var value))
                             continue;
-                        uploadValues.Add(value);
-                        uploadPoints.Add(_map[item.ValueType]);
-                        values[item.ValueType] = value;
+
+                        measureValues.Add(new MeasureValue
+                        {
+                            Created = DateTimeOffset.Now,
+                            Id = Guid.NewGuid(),
+                            Point = sensorId,
+                            Timestamp = DateTimeOffset.Now,
+                            Value = value
+                        });
                     }
 
-                    if (uploadValues.Count == 0)
+                    if (measureValues.Count == 0)
                         return Ok();
 
-                    _cache.Set(Memory.Values, values);
-                    _graphQlRequest.Variables = new { points = uploadPoints, values = uploadValues };
-                    var result = await _graphQlClient.PostAsync(_graphQlRequest);
-                    _logger.LogInformation($"Uploaded '{uploadValues.Count}' air values");
+                    _ = await _rep.MeasureValue.InsertBunchAsync(measureValues);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(2422, ex, $"Error while inserting '{uploadPoints.Count}' Luftdaten", airdata);
+                    _logger.LogError(2422, ex, $"Error while inserting '{measureValues.Count}' Luftdaten", airData);
                     return new StatusCodeResult(500);
                 }
                 return Ok();
             }
-        }
-
-        [HttpGet]
-        public IEnumerable<WeatherForecast> Get()
-        {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();
         }
     }
 }

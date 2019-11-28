@@ -1,10 +1,13 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using com.b_velop.stack.DataContext.Entities;
+using com.b_velop.stack.DataContext.Repository;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
@@ -13,18 +16,26 @@ using System.Threading.Tasks;
 
 namespace com.b_velop.Stack.Air.Server.Bl
 {
-
     public class UserService : IUserService
     {
-        // users hardcoded for simplicity, store in a db with hashed passwords in production applications
-        private List<User> _users = new List<User>
-        {
-            new User { Id = 1, FirstName = "Test", LastName = "User", Username = "test", Password = "test" }
-        };
+        private IRepositoryWrapper _rep;
+        private ILogger<UserService> _logger;
 
-        public async Task<User> Authenticate(string username, string password)
+        public UserService(
+            IRepositoryWrapper rep,
+            ILogger<UserService> logger)
         {
-            var user = await Task.Run(() => _users.SingleOrDefault(x => x.Username == username && x.Password == password));
+            _rep = rep;
+            _logger = logger;
+        }
+
+        public async Task<AirUser> Authenticate(
+            string username,
+            string password)
+        {
+            Expression<Func<AirUser, bool>> expression = user => user.Username == username && user.Password == password;
+
+            var user = (await _rep.AirUser.SelectByConditionAsync(expression))?.FirstOrDefault();
 
             // return null if user not found
             if (user == null)
@@ -34,24 +45,18 @@ namespace com.b_velop.Stack.Air.Server.Bl
             return user.WithoutPassword();
         }
 
-        public async Task<IEnumerable<User>> GetAll()
-        {
-            return await Task.Run(() => _users.WithoutPasswords());
-        }
+        public async Task<IEnumerable<AirUser>> GetAll()
+            => (await _rep.AirUser.SelectAllAsync()).WithoutPasswords();
     }
     public class User
     {
-        public int Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; }
+
     }
 
     public interface IUserService
     {
-        Task<User> Authenticate(string unsername, string password);
-        Task<IEnumerable<User>> GetAll();
+        Task<AirUser> Authenticate(string unsername, string password);
+        Task<IEnumerable<AirUser>> GetAll();
     }
 
     public class AuthenticateModel
@@ -64,11 +69,12 @@ namespace com.b_velop.Stack.Air.Server.Bl
 
     public static class ExtensionMethods
     {
-        public static IEnumerable<User> WithoutPasswords(this IEnumerable<User> users)
+        public static IEnumerable<AirUser> WithoutPasswords(this IEnumerable<AirUser> users)
         {
             return users.Select(_ => _.WithoutPassword());
         }
-        public static User WithoutPassword(this User user)
+
+        public static AirUser WithoutPassword(this AirUser user)
         {
             user.Password = null;
             return user;
@@ -92,7 +98,7 @@ namespace com.b_velop.Stack.Air.Server.Bl
             if (!Request.Headers.ContainsKey("Authorization"))
                 return AuthenticateResult.Fail("Missing Authorization Header");
 
-            User user = null;
+            AirUser user = null;
             try
             {
                 var authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
