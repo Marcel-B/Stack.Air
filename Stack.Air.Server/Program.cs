@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NLog.Web;
+using Prometheus;
 
 namespace Stack.Air.Server
 {
@@ -13,7 +15,33 @@ namespace Stack.Air.Server
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            const string file = "nlog.config";
+            var logger = NLogBuilder.ConfigureNLog(file).GetCurrentClassLogger();
+            try
+            {
+                logger.Debug("init main");
+                if (env != "Development")
+                {
+                    var metricServer = new MetricPusher(
+                        endpoint: "https://push.qaybe.de/metrics",
+                        job: "Stack.Air");
+                    metricServer.Start();
+                }
+                CreateHostBuilder(args)
+                .Build()
+                .Run();
+            }
+            catch (Exception ex)
+            {
+                //NLog: catch setup errors
+                logger.Error(ex, "Stopped program because of exception");
+                throw;
+            }
+            finally
+            {
+                NLog.LogManager.Shutdown();
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -21,6 +49,13 @@ namespace Stack.Air.Server
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                });
+                    webBuilder.UseUrls("http://*:5000");
+                })
+                .ConfigureLogging((hostingContext, logging) =>
+                {
+                    logging.ClearProviders();
+                    logging.SetMinimumLevel(LogLevel.Trace);
+                })
+              .UseNLog();
     }
 }

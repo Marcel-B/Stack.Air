@@ -61,6 +61,7 @@ namespace com.b_velop.Stack.Air.Server.Bl
         [Required]
         public string Password { get; set; }
     }
+
     public static class ExtensionMethods
     {
         public static IEnumerable<User> WithoutPasswords(this IEnumerable<User> users)
